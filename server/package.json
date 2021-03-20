@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon ..\\server\\src\\index.js --exec \"npm run lint && node\"",
-    "lint": "..\\node_modules\\.bin\\eslint **\\*.js"
+    "lint": "..\\server\\node_modules\\.bin\\eslint **\\*.js"
   },
   "keywords": [],
   "author": "",

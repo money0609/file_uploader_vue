@@ -1,7 +1,7 @@
 module.exports = {
-    "extends": "standard",
+    extends: 'standard',
     rules: {
         // disable indent checking
-        'indent': 'off'
+        indent: 'off'
       }
-};
+}
