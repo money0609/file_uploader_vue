@@ -17,14 +17,20 @@
 
             </div>
         </b-modal>
+
+        <Menu></Menu>
     </div>
 </template>
 
 <script>
 import AuthenticationService from '@/services/AuthenticationService'
+import Menu from './Menu'
 
 export default {
     name: 'Register',
+    components: {
+        Menu
+    },
     data () {
         return {
             username: ''
