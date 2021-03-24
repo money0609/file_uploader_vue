@@ -1,4 +1,11 @@
-html, body {
+html {
+    margin: 0px;
+    padding: 0px;
+    height: 100%;
+    overflow:hidden;
+}
+
+body {
     margin: 0px;
     padding: 0px;
     height: 100%;
@@ -30,4 +37,16 @@ html, body {
 
 #menuContainer > div#fileContentContainer {
     flex: 1 1 0px;
+    overflow-y: scroll;
+}
+
+#fileContentContainer {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 10px;
+}
+
+div.cardsContainer {
+    flex: 1 1 0px;
+    padding: 25px;
 }

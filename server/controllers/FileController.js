@@ -1,4 +1,18 @@
 module.exports = {
+    getAll (req, res) {
+        try {
+            console.log(req)
+                // message: `Hi ${req.body.username}!`
+
+            console.log('res null? ' + res)
+            console.log(typeof (res))
+            res.json(res)
+        } catch (error) {
+            res.status(500).send({
+                error: error.message
+            })
+        }
+    },
     upload (req, res) {
         // console.log(req)
 

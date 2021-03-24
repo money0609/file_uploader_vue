@@ -7,4 +7,6 @@ module.exports = (app, multer) => {
     app.post('/upload', multer.array('uploadFileName'), FileController.upload)
 
     app.post('/download', FileController.download)
+
+    app.post('/getAll', FileController.getAll)
 }

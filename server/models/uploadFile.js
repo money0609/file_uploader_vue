@@ -1,15 +1,16 @@
 const mongoose = require('mongoose')
 
 const uploadFileSchema = mongoose.Schema({
-    fileName: String,
-    creator: String,
-    selectedFile: String,
-    createdDate: {
-        type: Date,
-        default: new Date()
+    _ObjId: mongoose.Schema.Types.ObjectId,
+    filename: String,
+    contentType: String,
+    length: String,
+    md5: String,
+    testCol: {
+        data: Buffer
     }
 })
 
 const UploadFile = mongoose.model('UploadFile', uploadFileSchema)
 
-export default UploadFile
+module.exports = UploadFile

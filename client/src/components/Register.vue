@@ -18,7 +18,7 @@
             </div>
         </b-modal>
 
-        <Menu></Menu>
+        <Menu :username="username"></Menu>
     </div>
 </template>
 
