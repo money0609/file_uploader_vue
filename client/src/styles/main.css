@@ -35,7 +35,7 @@ body {
     flex: 0 0 auto;
 }
 
-#menuContainer > div#fileContentContainer {
+#menuContainer > #fileContentContainer {
     flex: 1 1 0px;
     overflow-y: scroll;
 }
@@ -46,7 +46,20 @@ body {
     margin: 10px;
 }
 
+#fileContentContainer > div.v-application--wrap{
+    flex-direction: row;
+    flex-wrap: inherit;
+}
+
 div.cardsContainer {
     flex: 1 1 0px;
     padding: 25px;
+}
+
+div.cardsContainer div.v-card__actions > button.v-btn.v-btn--left {
+    margin-right: auto;
+}
+
+div.cardsContainer div.v-card__actions > button.v-btn.v-btn--right {
+    margin-left: auto;
 }

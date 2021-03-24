@@ -24,6 +24,13 @@ export default {
           throw new Error('API call failed. ' + error.message)
         })
     },
+    download (data, config) {
+        return Api().post('download', { requestedFile: data }).then((response) => {
+            return response.data
+        }).catch((error) => {
+          throw new Error('API call failed. ' + error.message)
+        })
+    },
     fetchAllFiles () {
         return Api().get('fetchAllFiles').then((response) => {
             return response.data

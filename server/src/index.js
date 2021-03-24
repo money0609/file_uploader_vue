@@ -1,5 +1,4 @@
 const express = require('express')
-const bodyParser = require('body-parser')
 const cors = require('cors')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
@@ -7,11 +6,13 @@ const mongoose = require('mongoose')
 const multer = require('multer')
 const GridFsStorage = require('multer-gridfs-storage')
 const gridStream = require('gridfs-stream')
+const fs = require('fs')
 
 const app = express()
 
 app.use(morgan('combined'))
-app.use(bodyParser.json()) // if not working, change it back to app.use(bodyParser.json()). based on the doc, bodyparser is deprecated, being told it's built into express
+app.use(express.json({ limit: '5mb', extended: true })) // if not working, change it back to app.use(bodyParser.json()). based on the doc, bodyparser is deprecated, being told it's built into express
+app.use(express.urlencoded({ limit: '5mb', extended: true }))
 
 app.use(cors())
 
@@ -43,7 +44,7 @@ let updatedMetadata
 const updateMetadata = data => {
     console.log('########## Updating Metadata #############')
     updatedMetadata = data
-    console.log(updatedMetadata)
+    // console.log(updatedMetadata)
     console.log('##########     End Metadata  #############')
 }
 
@@ -56,7 +57,6 @@ const storage = new GridFsStorage({
     },
     file: (req, file) => {
         return new Promise((resolve, reject) => {
-            console.log('!!!!! Testing storage: ' + JSON.stringify(file))
             const fileInfo = {
                 filename: file.originalname,
                 bucketName: 'uploads',
@@ -161,29 +161,43 @@ app.post(
 
 // 32:00 https://www.youtube.com/watch?v=3f5Q9wDePzY
 app.post('/download', (req, res) => {
-    /*
-    gfs.findOne({ _id: req.params.ID, root: 'resume' }, function (err, file) {
+    const requestedFile = req.body.requestedFile
+
+    if (!requestedFile || !requestedFile._id) {
+        throw new Error('Requested file is missing information')
+    }
+    console.log('Testing download id: ' + requestedFile._id)
+
+    gfs.findOne({ _id: requestedFile._id }, function (err, file) {
         if (err) {
-            return res.status(400).send(err)
+            throw new Error('Something failed. ' + err)
+        } else if (!file) {
+            throw new Error('File not found on the database.')
         }
-        else if (!file) {
-            return res.status(404).send('Error on the database looking for the file.')
-        }
+
+        console.log('Found file: ' + file._id + ' Name: ' + file.filename)
 
         res.set('Content-Type', file.contentType)
         res.set('Content-Disposition', 'attachment; filename="' + file.filename + '"')
 
-        var readstream = gfs.createReadStream({
-          _id: req.params.ID,
-          root: 'resume'
+        const readstream = gfs.createReadStream({
+          _id: file._id
         })
 
-        readstream.on("error", function (err) {
-            res.end();
+        // readstream.pipe(res)
+
+        readstream.on('error', function (err) {
+            throw new Error('Download file failed. ' + err.message)
         })
-        readstream.pipe(res)
+
+        const fileStream = fs.createWriteStream('./logs/' + file.filename)
+
+        const writeStream = readstream.pipe(fileStream)
+
+        writeStream.on('finish', (returnedFile) => {
+            res.json(returnedFile)
+        })
     })
-    */
 })
 
 app.listen(

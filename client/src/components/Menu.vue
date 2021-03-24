@@ -51,8 +51,10 @@
 <script>
 import FileService from '@/services/FileService'
 import FileContent from './FileContent'
+import { toastMixin } from '../../mixins/Mixin'
 
 export default {
+    mixins: [toastMixin],
     props: ['username'],
     components: {
         FileContent
@@ -74,36 +76,12 @@ export default {
       }
     },
     methods: {
-        showToast (variant = 'default', bodyMsg) {
-            let title = 'Note'
-
-            switch (variant) {
-                case 'info':
-                    title = 'Info'
-                    break
-                case 'success':
-                    title = 'Success'
-                    break
-                case 'warning':
-                    title = 'Warning'
-                    break
-                case 'danger':
-                    title = 'Error'
-                    break
-            }
-
-            this.$bvToast.toast(bodyMsg, {
-                title: title,
-                variant: variant,
-                solid: true
-            })
-        },
         handleFunctionCall (functioName) {
             this[functioName]()
         },
         uploadFileClick () {
             console.log('Upload method clicked!')
-
+            this.showToast('info', 'Upload method clicked!')
             this.$refs.uploader.click()
         },
         async readFileAsDataURL (image) {
@@ -119,7 +97,13 @@ export default {
         },
         async preLoadFile (imgBase64) {
             console.log('IN PRE LOAD CHECK BASE64: ' + this.username)
-            await FileService.preUpload({ username: this.username, base64Str: imgBase64 }).then((returnedData) => {
+            let preUploadData = { username: this.username }
+
+            if (imgBase64) {
+                preUploadData.append('base64Str', imgBase64)
+            }
+
+            await FileService.preUpload(preUploadData).then((returnedData) => {
                 console.log('preLoadFile end')
                 console.log(returnedData)
                 return returnedData
@@ -143,7 +127,8 @@ export default {
             //     this.jaytest = reader.result
             // }, false)
 
-            this.jaytest = await this.readFileAsDataURL(selectedFileList[0])
+            // if (selectedFileList.f)
+            // this.jaytest = await this.readFileAsDataURL(selectedFileList[0])
 
             this.preLoadFile(this.jaytest)
 
