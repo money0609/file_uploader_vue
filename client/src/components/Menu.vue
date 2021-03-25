@@ -38,7 +38,6 @@
                     class="d-none"
                     type="file"
                     name="file"
-                    multiple
                     @change="onFileChanged"
                     @click="() => this.$refs.uploader.value = ''"
                 >
@@ -100,7 +99,7 @@ export default {
             let preUploadData = { username: this.username }
 
             if (imgBase64) {
-                preUploadData.append('base64Str', imgBase64)
+                preUploadData.base64Str = imgBase64
             }
 
             await FileService.preUpload(preUploadData).then((returnedData) => {
@@ -113,47 +112,38 @@ export default {
             let selectedFileList = e.target.files
 
             let selectedFileArr = []
+
             console.log('!! SELECTED LEN: ' + selectedFileList.length)
             if (!selectedFileList.length || selectedFileList.length < 1) {
                 console.log('Must select at least 1 file!')
                 return
             }
-            // let imgBase64
-            // const reader = new FileReader()
-/* eslint-disable */
-            // reader.addEventListener('load', () => {
-            //     // convert image file to base64 string
-            //     // console.log('File Base64: ' + reader.result)
-            //     this.jaytest = reader.result
-            // }, false)
 
-            // if (selectedFileList.f)
-            // this.jaytest = await this.readFileAsDataURL(selectedFileList[0])
+            // Check if the file exists. Yes, warning & return; No, continue.
 
-            this.preLoadFile(this.jaytest)
-
-            // console.log('IN ON CHANGE 64: ' + imgBase64)
             const formData = new FormData()
             for (let i = 0; i < selectedFileList.length; i++) {
-                formData.append('file', selectedFileList[i])
-            }
+                let imgBase64 = ''
+                console.log('I am 1')
+                if (selectedFileList[i].type.search(/^image\/.*/) > -1) {
+                    const reader = new FileReader()
 
-            /*
-            // check if selected file already uploaded.
-            for (let i = 0; i < selectedFileList.length; i++) {
-                formData.append('file', selectedFileList[i])
+                    reader.addEventListener('load', () => {
+                        // convert image file to base64 string
+                        // console.log('File Base64: ' + reader.result)
+                        imgBase64 = reader.result
+                    }, false)
 
-                selectedFileArr.push(selectedFileList[i].name + '.' + selectedFileList[i].type)
-            }
-
-            for (let i = 0; i < this.uploadedFiles.length; i++) {
-                if (selectedFileArr.includes(this.uploadedFiles[i].originalname + '.' + this.uploadedFiles[i].contentType)) {
-                    this.showToast('warning', 'Seleted file ' + this.uploadedFiles[i].originalname + ' already exists.')
-                    console.log('SHOWING TOAST')
-                    return
+                    imgBase64 = await this.readFileAsDataURL(selectedFileList[i])
+                    console.log(imgBase64 ? 'I am 2' : 'Missing 2')
+                    await this.preLoadFile(imgBase64)
+                    console.log('I am 3')
                 }
+
+                formData.append('file', selectedFileList[i])
+                console.log('I am 4')
             }
-            */
+
             // Save selected files.
             this.selectedFiles.files = selectedFileArr
 
@@ -169,10 +159,6 @@ export default {
                 }
             }
 
-            // return axios.post(url, formData, config)
-            // const dummy = await this.preLoadFile(imgBase64)
-            // console.log(dummy)
-            console.log('Upload Starting: ' + formData + '  ' + JSON.stringify(config))
             await FileService.upload(formData, config).then((returnedData) => {
                 if (returnedData && returnedData.files) {
                     returnedData.files.forEach(element => {

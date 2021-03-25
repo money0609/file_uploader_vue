@@ -67,17 +67,39 @@
                 </v-card-actions>
             </v-card>
         </div>
-        <v-progress-circular
+        <div class="cardsContainer skeletonContainer" style="">
+            <!-- <v-skeleton-loader
+                v-bind="attrs"
+            >
+            </v-skeleton-loader> -->
+            <b-skeleton-wrapper :loading="showProgress">
+                <template #loading>
+                    <b-card no-body img-top>
+                        <b-skeleton-img card-img="top"></b-skeleton-img>
+                        <b-card-body>
+                            <b-skeleton width="85%" animation="fade"></b-skeleton>
+                            <b-skeleton width="55%" animation="fade"></b-skeleton>
+                            <b-skeleton width="70%" animation="fade"></b-skeleton>
+                            <b-skeleton type="avatar"></b-skeleton>
+                        </b-card-body>
+                    </b-card>
+                </template>
+            </b-skeleton-wrapper>
+            <b-progress max="100" v-show=showProgress>
+                <b-progress-bar :value="selectedFiles.uploadProgress" :label="`Uploading: ${selectedFiles.uploadProgress}%`"></b-progress-bar>
+            </b-progress>
+        </div>
+
+        <!-- <v-progress-circular
             :rotate="-90"
             :size="100"
             :width="15"
             :value="selectedFiles.uploadProgress"
             color="teal"
-            v-show="isUploading"
+            v-show=showProgress
         >
             {{ selectedFiles.uploadProgress }}
-        </v-progress-circular>
-
+        </v-progress-circular> -->
     </v-app>
 </template>
 
@@ -91,7 +113,13 @@
         data () {
             return {
                 uploadedFiles: [],
-                isUploading: false
+                attrs: {
+                    class: 'mb-6 mx-auto',
+                    elevation: 2,
+                    width: '300px',
+                    type: 'card, list-item-three-line, button',
+                    loading: false
+                }
             }
         },
         methods: {
@@ -135,10 +163,21 @@
                 this.showToast('info', 'Preparing for downloading file')
 
                 await FileService.download(fileInfo).then((returnedData) => {
-                    this.showToast('success', 'Downloaded file: ' + JSON.stringify(returnedData))
+                    this.showToast('success', 'Downloaded file. ')
                 }).catch((error) => {
                     this.showToast('danger', 'Download failed' + error)
                 })
+            }
+        },
+        computed: {
+            showProgress: function () {
+                if (this.selectedFiles.uploadProgress === 100) {
+                    return false
+                }
+                return true
+            },
+            progressText () {
+                return 'Uploading: ' + this.selectedFiles.uploadProgress + '%'
             }
         },
         mounted () {

@@ -56,6 +56,33 @@ div.cardsContainer {
     padding: 25px;
 }
 
+div.cardsContainer > .b-skeleton-wrapper,
+div.cardsContainer > .progress {
+    width: 300px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+div.cardsContainer > .progress {
+    width: 300px;
+    margin-top: 5px;
+}
+
+.cardsContainer.skeletonContainer {
+    display: flex;
+    flex-direction: column;
+}
+.cardsContainer.skeletonContainer > div.b-skeleton-wrapper {
+    flex: 1 1 0;
+}
+.cardsContainer.skeletonContainer > div.b-skeleton-wrapper > div.card {
+    height: 100%;
+}
+
+.cardsContainer.skeletonContainer > .progress{
+    flex: 0 0 auto;
+}
+/*
 div.cardsContainer div.v-card__actions > button.v-btn.v-btn--left {
     margin-right: auto;
 }
@@ -63,3 +90,19 @@ div.cardsContainer div.v-card__actions > button.v-btn.v-btn--left {
 div.cardsContainer div.v-card__actions > button.v-btn.v-btn--right {
     margin-left: auto;
 }
+
+.v-skeleton-loader__button.v-skeleton-loader__bone {
+    margin-left: auto;
+    margin-right: 8px;
+    border-radius: 50%;
+    height: 32px;
+    width: 32px;
+}
+
+#fileContentContainer > .v-application--wrap > div.v-progress-circular {
+    bottom: 0;
+    right: 0;
+    position: fixed;
+    margin-right: 35px;
+    margin-bottom: 15px;
+} */
