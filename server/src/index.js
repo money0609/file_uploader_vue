@@ -6,18 +6,15 @@ const mongoose = require('mongoose')
 const multer = require('multer')
 const GridFsStorage = require('multer-gridfs-storage')
 const gridStream = require('gridfs-stream')
-const fs = require('fs')
+// const fs = require('fs')
 
 const app = express()
 
 app.use(morgan('combined'))
-app.use(express.json({ limit: '5mb', extended: true })) // if not working, change it back to app.use(bodyParser.json()). based on the doc, bodyparser is deprecated, being told it's built into express
-app.use(express.urlencoded({ limit: '5mb', extended: true }))
+app.use(express.json({ limit: '50mb', extended: true })) // if not working, change it back to app.use(bodyParser.json()). based on the doc, bodyparser is deprecated, being told it's built into express
+app.use(express.urlencoded({ limit: '50mb', extended: true }))
 
 app.use(cors())
-
-// const uploadFileModel = require('../models/uploadFile')
-
 // Connect to MongoDB
 const MONGODB_URL = 'mongodb+srv://fullstackweb:Hirejiaqi@cluster0.vyqq8.mongodb.net/fileUploader?retryWrites=true&w=majority'
 const PORT = process.env.PORT || 8081
@@ -34,7 +31,6 @@ let gfs
 
 conn.once('open', () => {
     // Init stream
-    // console.log(conn.db)
     gfs = gridStream(conn.db, mongoose.mongo)
     gfs.collection('uploads')
 })
@@ -42,10 +38,7 @@ conn.once('open', () => {
 let updatedMetadata
 
 const updateMetadata = data => {
-    console.log('########## Updating Metadata #############')
     updatedMetadata = data
-    // console.log(updatedMetadata)
-    console.log('##########     End Metadata  #############')
 }
 
 // Create a storage object with a given configuration
@@ -83,9 +76,7 @@ app.post('/register', (req, res) => {
             message: `Hi ${req.body.username}!`
         })
     } catch (error) {
-        res.status(500).send({
-            error: error.message
-        })
+        res.status(500).send(error.message)
     }
 })
 
@@ -104,32 +95,19 @@ app.get('/fetchAllFiles', (req, res) => {
 
             return res.json({ files: files })
         })
-
-        // uploadFileModel.find((err, files) => {
-        //     if (err) {
-        //         console.log('Get All Err: ' + err)
-        //         throw new Error(err)
-        //     } else {
-        //         console.log('Get All: ' + files)
-        //         return res.json(files)
-        //     }
-        // })
     } catch (error) {
-        res.status(500).send({
-            error: error.message
-        })
+        res.status(500).send(error.message)
     }
 })
 
 app.post('/preUpload', (req, res) => {
-    console.log('##########PRE UPLOAD START#############')
     const data = req.body
 
     if (!data) {
         throw new Error('Cannot parse image base64 string')
     }
+
     updateMetadata(data)
-    console.log('##########PRE UPLOAD END#############')
 
     res.json({})
 })
@@ -138,36 +116,117 @@ app.post(
     '/upload',
     upload.array('file'),
     (req, res) => {
-        console.log('########## UPLOAD START#############')
         try {
             // console.log(req.files)
             console.time('Upload Operation')
             if ((req && !req.files) || req.files.length < 1) {
-                throw new Error('File is required.')
+                throw new Error('File upload operation did not upload any file.')
             }
 
             // console.log(req.files)
                 // message: `Hi ${req.body.username}!`
             console.timeEnd('Upload Operation')
             console.log('########## UPLOAD END #############')
-            res.json({ files: req.files })
-        } catch (error) {
-            res.status(500).send({
-                error: error.message
+            // gfs.findOne({ _id: req.files.id }, function (err, file) {
+            //     if (err) {
+            //         throw new Error('Something failed. ' + err)
+            //     } else if (!file) {
+            //         throw new Error('File not found on the database.')
+            //     }
+            // })
+
+            const returnFiles = req.files.map(function (obj) {
+                if (obj.id) {
+                    obj._id = obj.id // Assign new key
+                    delete obj.id // Delete old key
+                }
+                if (obj.size) {
+                    obj.length = obj.size // Assign new key
+                    delete obj.size // Delete old key
+                }
+
+                return obj
             })
+
+            res.json({ files: returnFiles })
+        } catch (error) {
+            res.status(500).send(error.message)
         }
     }
 )
 
-app.post('/download', (req, res) => {
-    const requestedFile = req.body.requestedFile
+// app.post('/download', (req, res) => {
+//     const requestedFile = req.body.requestedFile
+//     // let fileId = req.query.page;
+//     // let filename = req.query.limit;
 
-    if (!requestedFile || !requestedFile._id) {
-        throw new Error('Requested file is missing information')
+//     if (!requestedFile || !requestedFile._id) {
+//         throw new Error('Requested file is missing information')
+//     }
+//     console.log('Testing download id: ' + requestedFile._id)
+
+//     // res.set('Content-Type', requestedFile.contentType)
+//     // res.set('Content-Disposition', 'attachment; filename="' + requestedFile.filename + '"')
+
+//     const readstream = gfs.createReadStream({
+//       _id: requestedFile._id
+//     })
+
+//     readstream.on('error', function (err) {
+//         throw new Error('Download file failed. ' + err.message)
+//     })
+
+//     // readstream.pipe(res)
+//     gfs.findOne({ _id: requestedFile._id }, function (err, file) {
+//         if (err) {
+//             throw new Error('Something failed. ' + err)
+//         } else if (!file) {
+//             throw new Error('File not found on the database.')
+//         }
+
+//         console.log('Found file: ' + file._id + ' Name: ' + file.filename)
+
+//         // res.set('Content-Type', file.contentType)
+//         // res.set('Content-Disposition', 'attachment; filename="' + file.filename + '"')
+
+//         const readstream = gfs.createReadStream({
+//           _id: file._id
+//         })
+
+//         // readstream.pipe(res)
+
+//         readstream.on('error', function (err) {
+//             throw new Error('Download file failed. ' + err.message)
+//         })
+
+//         const fileStream = fs.createWriteStream('./logs/' + file.filename)
+
+//         const writeStream = readstream.pipe(fileStream)
+
+//         writeStream.on('finish', (returnedFile) => {
+//             // res.json(returnedFile)
+//             res.download('./logs/' + file.filename)
+//         })
+//     })
+// })
+
+app.get('/download', (req, res) => {
+    const fileId = req.query.fileId
+
+    if (!req.query || !fileId) {
+        throw new Error('Requested file id is required.')
     }
-    console.log('Testing download id: ' + requestedFile._id)
 
-    gfs.findOne({ _id: requestedFile._id }, function (err, file) {
+    // const readstream = gfs.createReadStream({
+    //   _id: fileId
+    // })
+
+    // readstream.on('error', function (err) {
+    //     throw new Error('Download file failed. ' + err.message)
+    // })
+
+    // readstream.pipe(res)
+    gfs.findOne({ _id: fileId }, function (err, file) {
         if (err) {
             throw new Error('Something failed. ' + err)
         } else if (!file) {
@@ -181,21 +240,14 @@ app.post('/download', (req, res) => {
 
         const readstream = gfs.createReadStream({
           _id: file._id
+          // filename: file.filename
         })
 
-        // readstream.pipe(res)
-
-        readstream.on('error', function (err) {
-            throw new Error('Download file failed. ' + err.message)
+        readstream.on('error', function (error) {
+            res.status(500).send(error.message)
         })
 
-        const fileStream = fs.createWriteStream('./logs/' + file.filename)
-
-        const writeStream = readstream.pipe(fileStream)
-
-        writeStream.on('finish', (returnedFile) => {
-            res.json(returnedFile)
-        })
+        readstream.pipe(res)
     })
 })
 

@@ -43,7 +43,7 @@
                 >
             </v-navigation-drawer>
         </v-card>
-        <FileContent :selectedFiles="selectedFiles"/>
+        <FileContent :selectedFiles="selectedFiles" :isLoading="isLoading" :username="this.username" ref="fileContent"/>
     </div>
 </template>
 
@@ -64,7 +64,7 @@ export default {
             uploadProgress: 0,
             files: []
         },
-        jaytest: '',
+        isLoading: false,
         drawer: true,
         items: [
           { title: 'Upload', icon: 'mdi-cloud-upload', callFunc: 'uploadFileClick' }// ,
@@ -79,20 +79,34 @@ export default {
             this[functioName]()
         },
         uploadFileClick () {
-            console.log('Upload method clicked!')
-            this.showToast('info', 'Upload method clicked!')
+            // Show user that Multi uploading not supported yet if user clicked upload btn while it's loading. If it's not loading, then reset the progress value
+            if (this.isLoading) {
+                this.showToast('warning', 'The secret to multitasking is that it isn’t actually multitasking. It’s just extreme focus and organization. Not supported just yet :)')
+
+                return
+            } else {
+                if (this.selectedFiles.uploadProgress === 100) {
+                    this.selectedFiles.uploadProgress = 0
+                    this.isLoading = false
+                }
+            }
+
             this.$refs.uploader.click()
         },
         async readFileAsDataURL (image) {
-            let resultBase64 = await new Promise((resolve) => {
-                let fileReader = new FileReader()
-                fileReader.onload = (e) => resolve(fileReader.result)
-                fileReader.readAsDataURL(image)
-            })
+            try {
+                let resultBase64 = await new Promise((resolve) => {
+                    let fileReader = new FileReader()
+                    fileReader.onload = (e) => resolve(fileReader.result)
+                    fileReader.readAsDataURL(image)
+                })
 
-            console.log('Testing readFile func: ' + resultBase64) // aGV5IHRoZXJl...
+                console.log('Testing readFile func: ' + resultBase64) // aGV5IHRoZXJl...
 
-            return resultBase64
+                return resultBase64
+            } catch (error) {
+                throw new Error(error.message)
+            }
         },
         async preLoadFile (imgBase64) {
             console.log('IN PRE LOAD CHECK BASE64: ' + this.username)
@@ -106,71 +120,73 @@ export default {
                 console.log('preLoadFile end')
                 console.log(returnedData)
                 return returnedData
+            }).catch((error) => {
+                this.showToast('danger', error.message)
+                this.selectedFiles.uploadProgress = 0
+                this.isLoading = false
             })
         },
         async onFileChanged (e) {
             let selectedFileList = e.target.files
 
-            let selectedFileArr = []
-
-            console.log('!! SELECTED LEN: ' + selectedFileList.length)
+            console.log('!! SELECTED LEN: ' + JSON.stringify(selectedFileList[0]))
             if (!selectedFileList.length || selectedFileList.length < 1) {
                 console.log('Must select at least 1 file!')
                 return
             }
 
-            // Check if the file exists. Yes, warning & return; No, continue.
+            // Show loading card
+            this.isLoading = true
+
+            //  !!!!!!!!!!!!!!!!!!!!!!!!!!!! Check if the file exists. Yes, warning & return; No, continue.
 
             const formData = new FormData()
+
             for (let i = 0; i < selectedFileList.length; i++) {
                 let imgBase64 = ''
-                console.log('I am 1')
+
                 if (selectedFileList[i].type.search(/^image\/.*/) > -1) {
-                    const reader = new FileReader()
-
-                    reader.addEventListener('load', () => {
-                        // convert image file to base64 string
-                        // console.log('File Base64: ' + reader.result)
-                        imgBase64 = reader.result
-                    }, false)
-
                     imgBase64 = await this.readFileAsDataURL(selectedFileList[i])
-                    console.log(imgBase64 ? 'I am 2' : 'Missing 2')
-                    await this.preLoadFile(imgBase64)
-                    console.log('I am 3')
                 }
 
-                formData.append('file', selectedFileList[i])
-                console.log('I am 4')
-            }
+                await this.preLoadFile(imgBase64)
 
-            // Save selected files.
-            this.selectedFiles.files = selectedFileArr
+                formData.append('file', selectedFileList[i])
+            }
 
             let config = {
                 headers: { 'content-type': 'multipart/form-data' },
                 onUploadProgress: (progressEvent) => {
-                    console.log('Loaded: ' + progressEvent.loaded + ' Total: ' + progressEvent.total)
+                    // console.log('Loaded: ' + progressEvent.loaded + ' Total: ' + progressEvent.total)
                     this.selectedFiles.uploadProgress = Math.round((progressEvent.loaded * 90) / progressEvent.total)
-                    // do something with the percentCompleted
-                    // I used an observable to pass the data to a component and subscribed to it, to fill the progressbar
-                    console.log('Progress Loaded: ' + progressEvent.loaded)
-                    console.log('Current progress: ' + this.selectedFiles.uploadProgress)
                 }
             }
 
             await FileService.upload(formData, config).then((returnedData) => {
                 if (returnedData && returnedData.files) {
+                    this.$refs.fileContent.updateFileContent(returnedData.files)
                     returnedData.files.forEach(element => {
                         console.log('test loop ele: ' + element)
 
                         // this.uploadedFiles.push(element)
                     })
                     this.selectedFiles.uploadProgress = 100
+
+                    // Hide loading card and reset progress value
+                    this.isLoading = false
+                    this.selectedFiles.uploadProgress = 0
+
+                    // scroll to the file position (end of page)
+                    this.$el.querySelector('#fileContentContainer').scrollTop = this.$el.querySelector('#fileContentContainer').scrollHeight
                 } else {
                     this.showToast('danger', 'Something broken, no uploaded files found.')
                     this.selectedFiles.uploadProgress = 0
+                    this.isLoading = false
                 }
+            }).catch((error) => {
+                this.showToast('danger', error.message)
+                this.selectedFiles.uploadProgress = 0
+                this.isLoading = false
             })
         }
     }

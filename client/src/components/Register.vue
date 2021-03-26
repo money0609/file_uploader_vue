@@ -24,10 +24,12 @@
 
 <script>
 import AuthenticationService from '@/services/AuthenticationService'
+import { toastMixin } from '../../mixins/Mixin'
 import Menu from './Menu'
 
 export default {
     name: 'Register',
+    mixins: [toastMixin],
     components: {
         Menu
     },
@@ -57,7 +59,7 @@ export default {
 
             await AuthenticationService.register({
                 username: this.username
-            })
+            }).then(() => this.showToast('success', 'Welcome ' + this.username))
         }
     },
     mounted () {
