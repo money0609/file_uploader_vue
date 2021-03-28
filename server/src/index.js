@@ -251,6 +251,37 @@ app.get('/download', (req, res) => {
     })
 })
 
+app.get('/getFileById', (req, res) => {
+    const fileId = req.query.fileId
+
+    if (!req.query || !fileId) {
+        throw new Error('Requested file id is required.')
+    }
+
+    gfs.findOne({ _id: fileId }, function (err, file) {
+        if (err) {
+            throw new Error('Something failed. ' + err)
+        } else if (!file) {
+            throw new Error('File not found on the database.')
+        }
+
+        console.log('Found file: ' + file._id + ' Name: ' + file.filename)
+
+        res.set('Content-Type', file.contentType)
+        res.set('Content-Disposition', 'inline; filename="' + file.filename + '"')
+
+        const readstream = gfs.createReadStream({
+          _id: file._id
+        })
+
+        readstream.on('error', function (error) {
+            res.status(500).send(error.message)
+        })
+
+        readstream.pipe(res)
+    })
+})
+
 app.listen(
     PORT,
     () => console.log(`Connected on port: ${PORT}`)

@@ -108,12 +108,16 @@ export default {
                 throw new Error(error.message)
             }
         },
-        async preLoadFile (imgBase64) {
+        async preLoadFile (imgBase64, videoBlobUrl) {
             console.log('IN PRE LOAD CHECK BASE64: ' + this.username)
             let preUploadData = { username: this.username }
 
             if (imgBase64) {
                 preUploadData.base64Str = imgBase64
+            }
+
+            if (videoBlobUrl) {
+                preUploadData.videoBlobUrl = videoBlobUrl
             }
 
             await FileService.preUpload(preUploadData).then((returnedData) => {
@@ -144,12 +148,15 @@ export default {
 
             for (let i = 0; i < selectedFileList.length; i++) {
                 let imgBase64 = ''
+                let videoBlobUrl = ''
 
                 if (selectedFileList[i].type.search(/^image\/.*/) > -1) {
                     imgBase64 = await this.readFileAsDataURL(selectedFileList[i])
+                } else if (selectedFileList[i].type.search(/^video\/.*/) > -1) {
+                    videoBlobUrl = selectedFileList[i]
                 }
 
-                await this.preLoadFile(imgBase64)
+                await this.preLoadFile(imgBase64, videoBlobUrl)
 
                 formData.append('file', selectedFileList[i])
             }

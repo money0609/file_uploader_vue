@@ -10,6 +10,7 @@ import vuetify from './plugins/vuetify'
 // Import Bootstrap an BootstrapVue CSS files (order is important)
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import 'video.js/dist/video-js.css'
 import './styles/main.css'
 
 // Make BootstrapVue available throughout your project

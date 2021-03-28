@@ -51,5 +51,18 @@ export default {
 
             throw new Error('Fetch all files API call failed.')
         })
+    },
+    getFileById (data) {
+        return Api({
+            responseType: 'arraybuffer'
+        }).get('getFileById?fileId=' + data._id).then((response) => {
+            return response.data
+        }).catch((error) => {
+            if (error.response) {
+                throw new Error('Download API call failed. ' + error.response.data)
+            }
+
+            throw new Error('Download API call failed.')
+        })
     }
 }

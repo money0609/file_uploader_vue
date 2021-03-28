@@ -159,3 +159,21 @@ div.cardsContainer div.v-card__actions > button.v-btn.v-btn--right {
     margin-right: 35px;
     margin-bottom: 15px;
 } */
+
+/* Video rules */
+.videoContainer {
+    width: 100%;
+    height: 200px;
+}
+
+.videoContainer > .video-js {
+    width: 100%;
+    height: 100%;
+}
+
+.cardThumbnail > .v-image > div.v-responsive__content {
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    display: flex;
+}

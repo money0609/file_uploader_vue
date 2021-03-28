@@ -1,5 +1,6 @@
 <template>
     <v-app id="outterWrapper">
+        <video style="display:none" src='../assets/file_example_MP4.mp4'></video>
         <div id="contentHeaderContainer">
             <div id="contentHeader">
                 <p id="subHeader" class="text-h5">Shared Files</p>
@@ -36,23 +37,31 @@
                             height="200px"
                             :src="file.metadata ? file.metadata.base64Str : ''"
                         >
-                            <!-- <v-card-title>Top 10 Australian beaches</v-card-title> -->
                         </v-img>
                     </div>
-                    <div v-else-if="file.contentType.search(/^text\/.*/) > -1">
+                    <div class="cardThumbnail" v-else-if="file.contentType.search(/^video\/.*/) > -1">
+                        <v-img
+                            v-if="!showVideo['v' + file._id]"
+                            class="fill-height white--text align-end"
+                            height="200px"
+                            :src="require('../assets/logo.png')"
+                        >
+                            <v-btn
+                                color="info"
+                                fab
+                                @click="getFileById(file)"
+                            >
+                                <v-icon>mdi-arrow-right-drop-circle</v-icon>
+                            </v-btn>
+                        </v-img>
+
+                        <video-player ref='jRef' v-else :id="'v' + file._id" :fileId="file._id" :options="videoOptions"/>
+                    </div>
+                    <div v-else>
                         <v-img
                             class="fill-height white--text align-end"
                             height="200px"
                             :src="require('../assets/text_file.png')"
-                        >
-                            <!-- <v-card-title>Top 10 Australian beaches</v-card-title> -->
-                        </v-img>
-                    </div>
-                    <div v-else>
-                        <v-img
-                            class="white--text align-end"
-                            height="200px"
-                            :src="require('../assets/logo.png')"
                         >
                             <!-- <v-card-title>Top 10 Australian beaches</v-card-title> -->
                         </v-img>
@@ -126,16 +135,29 @@
 
 <script>
     import FileService from '@/services/FileService'
+    import VideoPlayer from './VideoPlayer'
     import { toastMixin } from '../../mixins/Mixin'
+    // import videojs from 'video.js'
 
     export default {
         mixins: [toastMixin],
         props: ['selectedFiles', 'isLoading', 'username'],
+        components: {
+            VideoPlayer
+        },
         data () {
             return {
                 uploadedFiles: [],
                 isLazyActive: false,
-                fetchingFiles: true
+                fetchingFiles: true,
+                showVideo: {},
+                videoBlobUrl: '',
+                jaytest: null,
+                videoOptions: {
+                    autoplay: false,
+                    controls: true,
+                    sources: []
+                }
             }
         },
         methods: {
@@ -153,6 +175,11 @@
                         //     console.log('My 64: ' + base64data)
                         // }
                         this.uploadedFiles = returnedData.files
+
+                        this.uploadedFiles.forEach(element => {
+                            // this.showVideo['v' + element._id] = false
+                            this.$set(this.showVideo, 'v' + element._id, false)
+                        })
                     }
                 }).catch((error) => {
                     this.showToast('danger', 'Fetch failed. ' + error.message)
@@ -172,6 +199,9 @@
                 const i = Math.floor(Math.log(bytes) / Math.log(k))
 
                 return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
+            },
+            getVideo (fileObj) {
+                return window.URL.createObjectURL(fileObj)
             },
             async download (fileInfo) {
                 console.log(JSON.stringify(fileInfo))
@@ -203,7 +233,7 @@
 
                 return resultBase64
             },
-            async downloadFile (fileInfo, base64Uri) {
+            async downloadFile (fileInfo, base64Uri, returnBlobUrl) {
                 var blob = new Blob([base64Uri])
 
                 const filename = fileInfo.filename
@@ -217,6 +247,10 @@
                     } else {
                         let URL = window.URL || window.webkitURL
                         const downloadUrl = URL.createObjectURL(blob)
+
+                        if (returnBlobUrl) {
+                            return downloadUrl
+                        }
 
                         // use HTML5 a[download] attribute to specify filename
                         const anchor = document.createElement('a')
@@ -245,6 +279,54 @@
                         this.uploadedFiles.push(files[i])
                     }
                 }
+            },
+            async getFileById (file) {
+                console.log(file._id + ' is showing video now')
+
+                // this.showVideo['v' + file._id] = true
+
+                if (!file || !file._id) {
+                    this.showToast('danger', 'The file id is required.')
+
+                    return
+                }
+
+                this.showToast('info', 'Fetching the Video file...')
+
+                const returnedData = await FileService.getFileById(file) // .then((returnedData) => {
+                        if (!returnedData) {
+                            throw new Error('Get file by ID failed. ')
+                        }
+                const blob = await this.downloadFile(file, returnedData, true) // .then((blob) => {
+                        if (!blob) {
+                            throw new Error('Create video blob failed. ')
+                        }
+                        this.videoBlobUrl = blob
+                    // })
+                    console.log('Video is available now: ' + this.videoBlobUrl)
+                    this.showToast('success', 'Video is available now. ')
+                    // this.showVideo['v' + file._id] = true
+                    console.log('TEST: v' + file._id)
+                    // this.jaytest = videojs('idtest')
+                    // this.jaytest.src({type: 'video/mp4', src: this.videoBlobUrl})
+                    // this.jaytest.load()
+                    // console.log('TEST after: v' + this.jaytest)
+                    // this.jaytest = this.$refs.jRef[0].player
+                    // this.jaytest.src({type: 'video/mp4', src: this.videoBlobUrl})
+                    // this.jaytest.load()
+                    // this.videoOptions.sources.src = this.videoBlobUrl
+                    // this.videoOptions.sources.type = file.contentType
+                    this.$set(this.videoOptions, 'sources', [
+                        {
+                            src: this.videoBlobUrl,
+                            type: file.contentType
+                        }
+                    ])
+                    // this.$set(this.videoOptions.sources, 'type', )
+                    this.$set(this.showVideo, 'v' + file._id, true)
+                // }).catch((error) => {
+                //     this.showToast('danger', 'Fetch video file failed. ' + error.message)
+                // })
             }
         },
         watch: {
