@@ -1,6 +1,5 @@
 <template>
     <v-app id="outterWrapper">
-        <video style="display:none" src='../assets/file_example_MP4.mp4'></video>
         <div id="contentHeaderContainer">
             <div id="contentHeader">
                 <p id="subHeader" class="text-h5">Shared Files</p>
@@ -44,7 +43,7 @@
                             v-if="!showVideo['v' + file._id]"
                             class="fill-height white--text align-end"
                             height="200px"
-                            :src="require('../assets/logo.png')"
+                            :src="require('../assets/video_file3.png')"
                         >
                             <v-btn
                                 color="info"
@@ -53,9 +52,20 @@
                             >
                                 <v-icon>mdi-arrow-right-drop-circle</v-icon>
                             </v-btn>
+                            <v-overlay
+                                :id="'vLoad_' + file._id"
+                                :absolute="absolute"
+                                :value="prepareVideo['vLoad_' + file._id]"
+                            >
+                                <v-progress-circular
+                                    indeterminate
+                                    size="50"
+                                ></v-progress-circular>
+                            </v-overlay>
                         </v-img>
 
                         <video-player ref='jRef' v-else :id="'v' + file._id" :fileId="file._id" :options="videoOptions"/>
+
                     </div>
                     <div v-else>
                         <v-img
@@ -130,6 +140,12 @@
                 {{ selectedFiles.uploadProgress }}
             </v-progress-circular> -->
         </div>
+        <v-overlay :value="prepareDownload">
+            <v-progress-circular
+                indeterminate
+                size="64"
+            ></v-progress-circular>
+        </v-overlay>
     </v-app>
 </template>
 
@@ -152,9 +168,11 @@
                 fetchingFiles: true,
                 showVideo: {},
                 videoBlobUrl: '',
-                jaytest: null,
+                prepareDownload: false,
+                prepareVideo: {},
+                absolute: true,
                 videoOptions: {
-                    autoplay: false,
+                    autoplay: true,
                     controls: true,
                     sources: []
                 }
@@ -178,7 +196,12 @@
 
                         this.uploadedFiles.forEach(element => {
                             // this.showVideo['v' + element._id] = false
-                            this.$set(this.showVideo, 'v' + element._id, false)
+                            if (element.contentType.search(/^video\/.*/) > -1) {
+                                this.$set(this.showVideo, 'v' + element._id, false)
+                                // this.prepareVideo['vLoad_' + element._id] = false
+
+                                this.$set(this.prepareVideo, 'vLoad_' + element._id, false)
+                            }
                         })
                     }
                 }).catch((error) => {
@@ -205,21 +228,28 @@
             },
             async download (fileInfo) {
                 console.log(JSON.stringify(fileInfo))
+                this.prepareDownload = true
+
                 if (!fileInfo || !fileInfo._id) {
                     this.showToast('danger', 'The file id is required.')
+
+                    this.prepareDownload = false
 
                     return
                 }
 
-                this.showToast('info', 'Downloading the file...')
+                this.showToast('info', 'Preparing for download...')
 
                 await FileService.download(fileInfo).then((returnedData) => {
                     console.log('TYPE: ' + typeof returnedData)
                     console.log('WHAT"S RETURNED DATA: ' + JSON.stringify(returnedData))
                     this.downloadFile(fileInfo, returnedData)
-                    this.showToast('success', 'Downloaded file. ')
+                    this.showToast('success', 'Downloaded.')
+                    this.prepareDownload = false
                 }).catch((error) => {
                     this.showToast('danger', 'Download failed. ' + error.message)
+
+                    this.prepareDownload = false
                 })
             },
             async readFileAsDataURL (image) {
@@ -282,29 +312,38 @@
             },
             async getFileById (file) {
                 console.log(file._id + ' is showing video now')
-
+                // this.prepareVideo['vLoad_' + file._id] = true
+                this.$set(this.prepareVideo, 'vLoad_' + file._id, true)
                 // this.showVideo['v' + file._id] = true
 
                 if (!file || !file._id) {
                     this.showToast('danger', 'The file id is required.')
 
+                    // this.prepareVideo['vLoad_' + file._id] = false
+                    this.$set(this.prepareVideo, 'vLoad_' + file._id, false)
+
                     return
                 }
 
-                this.showToast('info', 'Fetching the Video file...')
+                this.showToast('info', 'Preparing for the Video...')
 
                 const returnedData = await FileService.getFileById(file) // .then((returnedData) => {
                         if (!returnedData) {
+                            // this.prepareVideo['vLoad_' + file._id] = false
+                            this.$set(this.prepareVideo, 'vLoad_' + file._id, false)
+
                             throw new Error('Get file by ID failed. ')
                         }
                 const blob = await this.downloadFile(file, returnedData, true) // .then((blob) => {
                         if (!blob) {
+                            // this.prepareVideo['vLoad_' + file._id] = false
+                            this.$set(this.prepareVideo, 'vLoad_' + file._id, false)
+
                             throw new Error('Create video blob failed. ')
                         }
                         this.videoBlobUrl = blob
                     // })
                     console.log('Video is available now: ' + this.videoBlobUrl)
-                    this.showToast('success', 'Video is available now. ')
                     // this.showVideo['v' + file._id] = true
                     console.log('TEST: v' + file._id)
                     // this.jaytest = videojs('idtest')
@@ -324,6 +363,12 @@
                     ])
                     // this.$set(this.videoOptions.sources, 'type', )
                     this.$set(this.showVideo, 'v' + file._id, true)
+
+                    this.showToast('success', 'Video is available now. ')
+
+                    // this.prepareVideo['vLoad_' + file._id] = false
+
+                    this.$set(this.prepareVideo, 'vLoad_' + file._id, false)
                 // }).catch((error) => {
                 //     this.showToast('danger', 'Fetch video file failed. ' + error.message)
                 // })
