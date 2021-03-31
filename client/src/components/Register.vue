@@ -18,6 +18,8 @@
             </div>
         </b-modal>
 
+        <Spacewarp></Spacewarp>
+
         <Menu :username="username"></Menu>
     </div>
 </template>
@@ -26,12 +28,14 @@
 import AuthenticationService from '@/services/AuthenticationService'
 import { toastMixin } from '../../mixins/Mixin'
 import Menu from './Menu'
+import Spacewarp from './Spacewarp4'
 
 export default {
     name: 'Register',
     mixins: [toastMixin],
     components: {
-        Menu
+        Menu,
+        Spacewarp
     },
     data () {
         return {

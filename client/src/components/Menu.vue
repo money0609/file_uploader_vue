@@ -1,10 +1,11 @@
 <template>
     <div id="menuContainer">
-        <v-card>
+        <v-card id="drawerContainer">
             <v-navigation-drawer
                 v-model="drawer"
                 permanent
                 expand-on-hover
+                overlay-color="#ffffff"
             >
                 <v-list-item class="px-2">
                     <v-list-item-avatar>
@@ -23,9 +24,10 @@
                         :key="item.title"
                         link
                         @click="handleFunctionCall(item.callFunc)"
+                        class="white--text"
                     >
                         <v-list-item-icon>
-                            <v-icon>{{ item.icon }}</v-icon>
+                            <v-icon style="color: white;" color="blue darken-2">{{ item.icon }}</v-icon>
                         </v-list-item-icon>
 
                         <v-list-item-content>

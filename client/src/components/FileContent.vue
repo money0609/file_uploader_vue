@@ -24,7 +24,7 @@
                     transition="fade-transition"
                 >
                 <v-card
-                    class="mx-auto"
+                    class="mx-auto cardEle"
                     width="250px"
                     style="overflow-wrap='normal'"
                     hover
@@ -43,10 +43,10 @@
                             v-if="!showVideo['v' + file._id]"
                             class="fill-height white--text align-end"
                             height="200px"
-                            :src="require('../assets/video_file3.png')"
+                            :src="require('../assets/video_file.png')"
                         >
                             <v-btn
-                                color="info"
+                                class="cardBtn"
                                 fab
                                 @click="getFileById(file)"
                             >
@@ -71,13 +71,13 @@
                         <v-img
                             class="fill-height white--text align-end"
                             height="200px"
-                            :src="require('../assets/text_file.png')"
+                            :src="require('../assets/text_file5.png')"
                         >
                             <!-- <v-card-title>Top 10 Australian beaches</v-card-title> -->
                         </v-img>
                     </div>
                     <!-- <span>{{ 'Name: ' + file.filename + '\n' + 'by: ' + (file.metadata.username ? file.metadata.username : 'Unknown') + '\n' + 'Type: ' + file.contentType + '\n' + 'Size: ' + (file.length ? formatBytes(file.length) : 'Unknown')}}</span> -->
-                    <v-card-subtitle class="pb-0" v-b-tooltip.hover="{ variant: 'info' }"  v-b-tooltip.hover.bottomright="file.filename">
+                    <v-card-subtitle id="cardSubtitble" class="pb-0" v-b-tooltip.hover="{ variant: 'info' }"  v-b-tooltip.hover.bottomright="file.filename">
                         {{ file.filename }}
                     </v-card-subtitle>
 
@@ -98,7 +98,7 @@
                         </v-btn> -->
 
                         <v-btn
-                            color="info"
+                            class="cardBtn"
                             fab
                             x-small
                             right

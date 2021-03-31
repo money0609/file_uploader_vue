@@ -6,8 +6,7 @@
 </template>
 
 <script>
-/* eslint-disable */
-import videojs from 'video.js';
+import videojs from 'video.js'
 
 export default {
     name: 'VideoPlayer',
@@ -25,24 +24,24 @@ export default {
             }
         }
     },
-    data() {
+    data () {
         return {
             player: null
         }
     },
-    mounted() {
-        this.player = videojs(this.$refs.videoPlayer, this.options, function onPlayerReady() {
-            console.log('onPlayerReady', this);
+    mounted () {
+        this.player = videojs(this.$refs.videoPlayer, this.options, function onPlayerReady () {
+            console.log('onPlayerReady', this)
             // console.log('Play Ready check: ' + JSON.stringify(this.file))
         })
 
         // 605d051281106d646cd669f2
-        this.player.bigPlayButton.on('click', function(){
+        this.player.bigPlayButton.on('click', function () {
             // do the action
             console.log('########## BIG BUTTON CLICKED: ' + JSON.stringify(this.options()))
-        });
+        })
     },
-    beforeDestroy() {
+    beforeDestroy () {
         if (this.player) {
             this.player.dispose()
         }

@@ -66,12 +66,14 @@ body {
     margin: 0;
     padding: 0;
     margin-right: auto;
+    color: white;
 }
 
 #outterWrapper > .v-application--wrap > #contentHeaderContainer > #contentHeader > p#loginUser {
     margin: 0;
     padding: 0;
     margin-left: auto;
+    color: white;
 }
 
 #fileContentContainer {
@@ -176,4 +178,49 @@ div.cardsContainer div.v-card__actions > button.v-btn.v-btn--right {
     align-items: center;
     height: 100%;
     display: flex;
+}
+
+/* Three.js component */
+
+#spacewarpContainer {
+    height: 100%;
+    position: absolute;
+}
+
+#drawerContainer {
+    background-color: transparent;
+    background: rgb(232 255 255 / 10%)
+}
+
+#drawerContainer > .v-navigation-drawer {
+    background-color: transparent;
+}
+
+.cardEle {
+    background: rgb(232 255 255 / 10%) !important;
+}
+
+#cardSubtitble {
+    color: black;
+    background: rgb(232 255 255 / 20%);
+}
+
+.v-card > .v-card__text {
+    background: rgb(232 255 255 / 20%);
+}
+
+.v-list-item__title {
+    color: white;
+}
+
+#drawerContainer div.v-navigation-drawer__content div.v-list-item {
+    color: white
+}
+
+#drawerContainer div.v-navigation-drawer__content div.v-list-item:hover {
+    background: rgb(232 255 255 / 20%);
+}
+
+.cardBtn {
+    background-color: rgb(232 255 255 / 50%) !important;
 }
