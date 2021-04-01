@@ -3,135 +3,164 @@
 </template>
 
 <script>
-import * as Three from 'three/build/three.module.js'
+import * as THREE from 'three/build/three.module.js'
+import * as POSTPROCESSING from 'postprocessing'
 
 export default ({
     data () {
         return {
-            jaytest: null,
             camera: null,
             scene: null,
+            cloudParticles: [],
             renderer: null,
-            mesh: null,
-            stars: null,
-            starsNum: 5000,
-            position: null,
-            positionArr: [],
-            velocityArr: []
+            composer: null
         }
     },
     methods: {
         init () {
-            console.log('In THREE INIT')
-            const spacewarpContainer = this.$refs.spacewarpContainer
+            let cloudMaterial = null
+            let cloudGeo = null
 
-            // ************************    Cube    ************************
-            // this.camera = new Three.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 10)
-            // this.camera.position.z = 1
+            this.scene = new THREE.Scene()
+            this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000)
 
-            // this.scene = new Three.Scene()
-
-            // const geometry = new Three.BoxGeometry(0.2, 0.2, 0.2)
-            // const material = new Three.MeshNormalMaterial()
-
-            // this.mesh = new Three.Mesh(geometry, material)
-            // this.scene.add(this.mesh)
-
-            // this.renderer = new Three.WebGLRenderer({ antialias: true })
-            // this.renderer.setSize(spacewarpContainer.clientWidth, spacewarpContainer.clientHeight)
-            // spacewarpContainer.appendChild(this.renderer.domElement)
-
-            // this.jaytest = Three
-
-            // ************************    Spacewarp    ************************
-            // const starGeom = new Three.SphereGeometry()
-            const starGeom = new Three.BufferGeometry()
-            this.scene = new Three.Scene()
-            // this.scene.fog = new Three.FogExp2(0x000000, 0.001)
-
-            // setup camera with facing upward
-            this.camera = new Three.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 2, 2000)
+            // set camera position Z to 1.
             this.camera.position.z = 1
-            this.camera.rotation.x = Math.PI / 2
 
-            // const sprite = new Three.TextureLoader().load('../assets/sprite.jpg')
+            // roate camera to see all of the plane objects.
+            this.camera.rotation.x = 1.16
+            this.camera.rotation.y = -0.12
+            this.camera.rotation.z = 0.27
 
-            const vertices = {
-                position: [],
-                velocity: []
-            }
+            // set lights color and postion.
+            let ambient = new THREE.AmbientLight(0x555555)
+            this.scene.add(ambient)
 
-            for (let i = 0; i < this.starsNum; i++) {
-                const x = 2000 * Math.random() - 1000
-                const y = 2000 * Math.random() - 1000
-                const z = 2000 * Math.random() - 1000
+            let directionalLight = new THREE.DirectionalLight(0xf2f2f2)
+            directionalLight.position.set(0, 0, 1)
+            this.scene.add(directionalLight)
 
-                vertices.position.push(x, y, z)
-                vertices.velocity[i] = 0
-            }
+            let orangeLight = new THREE.PointLight(0xcc6600, 50, 450, 1.7)
+            orangeLight.position.set(200, 300, 100)
+            this.scene.add(orangeLight)
 
-            starGeom.setAttribute('position', new Three.Float32BufferAttribute(vertices.position, 3))
-            starGeom.setAttribute('velocity', new Three.Float32BufferAttribute(vertices.velocity, 1))
+            let redLight = new THREE.PointLight(0xd8547e, 50, 450, 1.7)
+            redLight.position.set(100, 300, 100)
+            this.scene.add(redLight)
 
-            const starMaterial = new Three.PointsMaterial({
-                color: 0xffffff,
-                size: 0.7,
-                map: new Three.TextureLoader().load('https://i.ibb.co/phHQQMH/particle-sprite.png')
-            })
-            // setup renderer
-            this.renderer = new Three.WebGLRenderer()
+            let blueLight = new THREE.PointLight(0x3677ac, 50, 450, 1.7)
+            blueLight.position.set(300, 300, 200)
+            this.scene.add(blueLight)
 
-            // will set overflow hidden later on.
+            this.renderer = new THREE.WebGLRenderer()
 
             this.renderer.setSize(window.innerWidth, window.innerHeight)
-            // append the scene to the div
-            spacewarpContainer.appendChild(this.renderer.domElement)
 
-            // const starNum = 1000
+            this.scene.fog = new THREE.FogExp2(0x010b13, 0)
 
-            // starGeom.setAttribute('position', new Three.BufferAttribute(new Float32Array(6 * starNum), 3))
+            this.renderer.setClearColor(this.scene.fog.color)
 
-            this.position = starGeom.getAttribute('position')
-            this.positionArr = this.position.array
-            this.velocityArr = starGeom.getAttribute('velocity').array
+            // append to the div
+            this.$refs.spacewarpContainer.appendChild(this.renderer.domElement)
 
-            this.stars = new Three.Points(starGeom, starMaterial)
+            // add Cloud texture
+            let loader = new THREE.TextureLoader()
+            loader.load('https://i.ibb.co/4Yn1YCr/smoke-cloud.png', (texture) => {
+                // texture is loaded
+                cloudGeo = new THREE.PlaneBufferGeometry(500, 500)
+                cloudMaterial = new THREE.MeshLambertMaterial({
+                    map: texture,
+                    transparent: true
+                })
 
-            this.scene.add(this.stars)
+                // generate 30 clouds
+                for (let p = 0; p < 30; p++) {
+                    let cloud = new THREE.Mesh(cloudGeo, cloudMaterial)
 
-            // play it
-            this.animate()
-        },
-        animate () {
-            // console.log('In animate')
-            // ************************    Cube    ************************
-            // requestAnimationFrame(this.animate)
-            // this.mesh.rotation.x += 0.01
-            // this.mesh.rotation.y += 0.02
-            // this.renderer.render(this.scene, this.camera)
+                    cloud.position.set(
+                        Math.random() * 800 - 400,
+                        500,
+                        Math.random() * 500 - 500
+                    )
 
-            // ************************    Spacewarp    ************************
-            const acceleration = 0.002
+                    cloud.rotation.x = 1.16
+                    cloud.rotation.y = -0.12
+                    cloud.rotation.z = Math.random() * 2 * Math.PI
 
-            for (let i = 0; i < this.starsNum; i++) {
-                this.velocityArr[2 * i] += acceleration
-                this.positionArr[6 * i + 1] -= this.velocityArr[2 * i]
+                    cloud.material.opacity = 0.55
 
-                if (this.positionArr[6 * i + 1] < -200) {
-                    this.positionArr[6 * i + 1] = Three.MathUtils.randFloatSpread(2000)
-                    this.velocityArr[2 * i] = 0
+                    this.cloudParticles.push(cloud)
+
+                    this.scene.add(cloud)
                 }
+            })
+
+            const sudo = this
+            loader.load('https://i.ibb.co/M2BPHFz/space-stars.jpg', function (texture) {
+                const textureEffect = new POSTPROCESSING.TextureEffect({
+                    blendFunction: POSTPROCESSING.BlendFunction.COLOR_DODGE,
+                    texture: texture
+                })
+
+                textureEffect.blendMode.opacity.value = 0.8
+
+                const bloomEffect = new POSTPROCESSING.BloomEffect({
+                    blendFunction: POSTPROCESSING.BlendFunction.COLOR_DODGE,
+                    kernelSize: POSTPROCESSING.KernelSize.SMALL,
+                    useLuminanceFilter: true,
+                    luminanceThreshold: 0.3,
+                    luminanceSmoothing: 0.75
+                })
+                bloomEffect.blendMode.opacity.value = 1.5
+
+                let effectPass = new POSTPROCESSING.EffectPass(
+                    sudo.camera,
+                    bloomEffect,
+                    textureEffect
+                )
+
+                effectPass.renderToScreen = true
+
+                sudo.composer = new POSTPROCESSING.EffectComposer(sudo.renderer)
+
+                sudo.composer.addPass(new POSTPROCESSING.RenderPass(sudo.scene, sudo.camera))
+
+                sudo.composer.addPass(effectPass)
+
+                sudo.render()
+            })
+        },
+        onWindowResize () {
+            const container = document.querySelector('#spacewarpContainer')
+
+            if (container.offsetWidth > 250 && container.offsetHeight > 500) {
+                this.camera.aspect = container.offsetWidth / container.offsetHeight
+
+                this.camera.updateProjectionMatrix()
+
+                this.renderer.setSize(container.offsetWidth, container.offsetHeight)
             }
-            this.position.needsUpdate = true
-            this.stars.rotation.y += 0.0002
+        },
+        render () {
+            for (let i = 0; i < this.cloudParticles.length; i++) {
+                this.cloudParticles[i].rotation.z -= 0.001
+            }
+
+            this.composer.render(0.1)
+
             this.renderer.render(this.scene, this.camera)
-            requestAnimationFrame(this.animate)
+
+            requestAnimationFrame(this.render)
         }
+    },
+    created: function () {
+        window.addEventListener('resize', this.onWindowResize)
+    },
+    beforeDestroy: function () {
+        window.removeEventListener('resize', this.onWindowResize)
     },
     mounted () {
         this.init()
-        // this.animate()
-        console.log('Test working.')
     }
 })
 </script>

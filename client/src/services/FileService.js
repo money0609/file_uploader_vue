@@ -53,9 +53,13 @@ export default {
         })
     },
     getFileById (data) {
+        if (!data || !data._id) {
+            throw new Error('File ID is required.')
+        }
+
         return Api({
             responseType: 'arraybuffer'
-        }).get('getFileById?fileId=' + data._id).then((response) => {
+        }).get('getFileById?fileId=' + data._id + (data.download === 'true' ? '&download=true' : '')).then((response) => {
             return response.data
         }).catch((error) => {
             if (error.response) {

@@ -1,6 +1,5 @@
 <template>
     <div class="videoContainer">
-        <!-- <video :id="'vid_' + fileId" ref="videoPlayer" class="video-js"></video> -->
         <video id="idtest" ref="videoPlayer" class="video-js"></video>
     </div>
 </template>
@@ -30,15 +29,9 @@ export default {
         }
     },
     mounted () {
+        // Initialize videojs Object.
         this.player = videojs(this.$refs.videoPlayer, this.options, function onPlayerReady () {
-            console.log('onPlayerReady', this)
-            // console.log('Play Ready check: ' + JSON.stringify(this.file))
-        })
-
-        // 605d051281106d646cd669f2
-        this.player.bigPlayButton.on('click', function () {
-            // do the action
-            console.log('########## BIG BUTTON CLICKED: ' + JSON.stringify(this.options()))
+            // Do something on player ready eventually.
         })
     },
     beforeDestroy () {

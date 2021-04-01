@@ -5,7 +5,3 @@ export default {
         return Api().post('register', username)
     }
 }
-
-// AuthenticationService.register({
-
-// })

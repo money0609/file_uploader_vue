@@ -28,7 +28,7 @@
 import AuthenticationService from '@/services/AuthenticationService'
 import { toastMixin } from '../../mixins/Mixin'
 import Menu from './Menu'
-import Spacewarp from './Spacewarp4'
+import Spacewarp from './Spacewarp'
 
 export default {
     name: 'Register',
@@ -51,9 +51,6 @@ export default {
     methods: {
         showNameModal () {
             this.$refs['nameModal'].show()
-        },
-        hideNameModal () {
-            this.$refs['nameModal'].hide()
         },
         async saveUsername (evt) {
             if (this.username.length < 3) {
