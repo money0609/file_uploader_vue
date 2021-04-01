@@ -49,6 +49,8 @@
                                 class="cardBtn"
                                 fab
                                 @click="getFileById(file)"
+                                v-b-tooltip.hover="{ variant: 'info' }"
+                                v-b-tooltip.hover.bottomright="'Play'"
                             >
                                 <v-icon>mdi-arrow-right-drop-circle</v-icon>
                             </v-btn>
@@ -103,6 +105,8 @@
                             x-small
                             right
                             @click="download(file)"
+                            v-b-tooltip.hover="{ variant: 'info' }"
+                            v-b-tooltip.hover.bottomright="'Download'"
                         >
                             <v-icon>mdi-download</v-icon>
                         </v-btn>
@@ -377,7 +381,7 @@
         watch: {
             isLoading () {
                 if (this.isLoading) {
-                    this.$el.scrollTop = this.$el.scrollHeight
+                    this.$refs.fileContentContainer.scrollTop = this.$refs.fileContentContainer.scrollHeight
                 }
             }
         },

@@ -22,6 +22,7 @@ export default ({
             parameters: null,
             mouseX: 0,
             mouseY: 0,
+            target: new THREE.Vector3(),
             windowHalfX: window.innerWidth / 2,
             windowHalfY: window.innerHeight / 2,
             materials: []
@@ -74,7 +75,7 @@ export default ({
                     transparent: true
                 })
 
-                for (let p = 0; p < 50; p++) {
+                for (let p = 0; p < 30; p++) {
                     let cloud = new THREE.Mesh(cloudGeo, cloudMaterial)
 
                     cloud.position.set(
@@ -140,15 +141,14 @@ export default ({
             // this.scene.add(objectCSS)
             // spacewarpContainer.appendChild(cardContainer)
             // window.addEventListener('resize', this.onWindowResize(), false)
+
+            // const cameraPerspectiveHelper = new THREE.CameraHelper(this.camera)
+            // this.scene.add(cameraPerspectiveHelper)
         },
         onWindowResize () {
-            const eleBound = this.$refs.spacewarpContainer.getBoundingClientRect()
-            this.camera.aspect = eleBound.width / eleBound.height
-            console.log('W: ' + eleBound.width + ', H: ' + eleBound.height)
+            this.camera.aspect = window.innerWidth / window.innerHeight
             this.camera.updateProjectionMatrix()
-            this.renderer.setSize(eleBound.width, eleBound.height)
-
-            console.log('WW: ' + window.innerWidth + ', WH: ' + window.innerHeight)
+            this.renderer.setSize(window.innerWidth, window.innerHeight)
         },
         onPointerMove (event) {
             if (!event || event.isPrimary === false) {
@@ -156,6 +156,7 @@ export default ({
             }
             this.mouseX = event.clientX - this.windowHalfX
             this.mouseY = event.clientY - this.windowHalfY
+            // console.log('X: ' + event.clientX + ', Y: ' + event.clientY)
         },
         animate () {
             // console.log('In animate')
@@ -168,6 +169,12 @@ export default ({
             // ************************    Spacewarp    ************************
             // eslint-disable-next-line
             requestAnimationFrame(this.animate)
+
+            // this.target.x += (this.mouseX - this.target.x) * 0.02
+            // this.target.y += (-this.mouseY - this.target.y) * 0.02
+            // this.target.z = this.camera.position.z
+
+            // this.camera.lookAt(this.target)
             this.render()
         },
         render () {
@@ -177,15 +184,23 @@ export default ({
 
             this.composer.render(0.1)
 
+            // this.camera.position.x += (this.mouseX - this.camera.position.x) * 0.05
+            // this.camera.position.y += (-this.mouseY - this.camera.position.y) * 0.05
+
+            // this.camera.lookAt(this.scene.position)
+            // console.log('X-Y-Z: ' + this.camera.position.x + '-' + this.camera.position.y + '-' + this.camera.position.z)
+
             this.renderer.render(this.scene, this.camera)
             requestAnimationFrame(this.render)
         }
     },
-    ready: function () {
-        window.addEventListener('resize', this.onWindowResize())
+    created: function () {
+        window.addEventListener('resize', this.onWindowResize)
+        // document.addEventListener('mousemove', this.onPointerMove)
     },
     beforeDestroy: function () {
-        window.removeEventListener('resize', this.onWindowResize())
+        window.removeEventListener('resize', this.onWindowResize)
+        // document.removeEventListener('mousemove', this.onPointerMove)
     },
     mounted () {
         this.init()
