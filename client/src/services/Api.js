@@ -2,7 +2,7 @@ import axios from 'axios'
 
 export default (optionalConfig) => {
     let config = {
-        baseURL: `http://localhost:8081`
+        baseURL: `https://fileuploadercloud-server.herokuapp.com/`
     }
 
     if (optionalConfig) {
