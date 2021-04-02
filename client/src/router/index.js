@@ -6,11 +6,12 @@ import Register from '@/components/Register'
 Vue.use(Router)
 
 export default new Router({
-  routes: [
-    {
-      path: '/',
-      name: 'register',
-      component: Register
-    }
-  ]
+    mode: 'history',
+    routes: [
+        {
+            path: '/',
+            name: 'register',
+            component: Register
+        }
+    ]
 })

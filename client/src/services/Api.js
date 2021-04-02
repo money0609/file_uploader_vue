@@ -12,6 +12,6 @@ export default (optionalConfig) => {
             }
         }
     }
-    console.log('Api: ' + JSON.stringify(config))
+
     return axios.create(config)
 }

@@ -168,6 +168,10 @@ div.cardsContainer div.v-card__actions > button.v-btn.v-btn--right {
     position: absolute;
 }
 
+#spacewarpContainer > canvas {
+    height: 100% !important;
+    width: 100% !important;
+}
 #drawerContainer {
     background-color: transparent;
     background: rgb(232 255 255 / 10%)

@@ -158,6 +158,11 @@
                 prepareVideo: {},
                 absolute: true,
                 videoOptions: {
+                    controlBar: {
+                        volumePanel: {
+                            inline: false
+                        }
+                    },
                     autoplay: true,
                     controls: true,
                     sources: []
@@ -167,6 +172,7 @@
         methods: {
             async fetchAllFiles () {
                 this.fetchingFiles = true
+                this.prepareDownload = true
 
                 await FileService.fetchAllFiles().then((returnedData) => {
                     if (returnedData && returnedData.files) {
@@ -186,6 +192,7 @@
                 })
 
                 this.fetchingFiles = false
+                this.prepareDownload = false
             },
             formatBytes (bytes, decimals = 2) {
                 if (bytes === 0) {
