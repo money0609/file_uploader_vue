@@ -12,7 +12,6 @@ app.use(morgan('combined'))
 app.use(express.json({ limit: '50mb', extended: true })) // if not working, change it back to app.use(bodyParser.json()). based on the doc, bodyparser is deprecated, being told it's built into express
 app.use(express.urlencoded({ limit: '50mb', extended: true }))
 app.use(cors())
-// app.use(serveStatic(__dirname, '../dist/index.html'))
 
 // Connect to MongoDB
 const MONGODB_URL = 'mongodb+srv://fullstackweb:Hirejiaqi@cluster0.vyqq8.mongodb.net/fileUploader?retryWrites=true&w=majority'
@@ -181,6 +180,15 @@ app.get('/getFileById', (req, res) => {
         readstream.pipe(res)
     })
 })
+
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(__dirname + '/public/'))
+
+    // handle spa
+    app.get(/.*/, (req, res) => {
+        res.sendFile(__dirname + '/public/index.html')
+    })
+}
 
 app.listen(
     PORT,
