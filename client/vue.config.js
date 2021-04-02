@@ -1,5 +1,5 @@
 module.exports = {
     devServer: {
-      host: 'https://fileuploadercloud-server.herokuapp.com/'
+      host: 'fileuploadercloud-server.herokuapp.com'
     }
   }
