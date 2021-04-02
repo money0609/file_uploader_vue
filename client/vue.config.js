@@ -1,5 +1,12 @@
+const path = require('path')
+
 module.exports = {
     devServer: {
-      host: 'fileuploadercloud-server.herokuapp.com'
+        outputDir: path.resolve(__dirname, '../server/pulic'),
+        proxy: {
+            '/': {
+                target: 'http://localhost: 8080'
+            }
+        }
     }
   }
