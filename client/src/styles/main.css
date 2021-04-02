@@ -123,8 +123,11 @@ div.cardsContainer > .progress {
     display: flex;
     flex-direction: column;
 }
-.cardsContainer.skeletonContainer > div.b-skeleton-wrapper {
+/* .cardsContainer.skeletonContainer > div.b-skeleton-wrapper {
     flex: 1 1 0;
+} */
+.cardsContainer.skeletonContainer > .b-skeleton-wrapper .b-aspect-content {
+    height: 200px;
 }
 .cardsContainer.skeletonContainer > div.b-skeleton-wrapper > div.card {
     height: 100%;
