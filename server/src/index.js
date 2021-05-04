@@ -116,7 +116,6 @@ app.post(
     upload.array('file'),
     (req, res) => {
         try {
-            console.time('Upload Operation')
 
             // Check the uploaded files.
             if ((req && !req.files) || req.files.length < 1) {

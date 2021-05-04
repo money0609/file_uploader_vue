@@ -4,7 +4,7 @@
 
 <script>
 import * as THREE from 'three/build/three.module.js'
-import * as POSTPROCESSING from 'postprocessing'
+import * as POSTPROCESSING from 'postprocessing' // implement image filter effects for three.js
 
 export default ({
     data () {
@@ -65,7 +65,7 @@ export default ({
 
             // add Cloud texture
             let loader = new THREE.TextureLoader()
-            loader.load('https://i.ibb.co/4Yn1YCr/smoke-cloud.png', (texture) => {
+            loader.load('https://i.ibb.co/Rh11CXt/smoke-cloud.png', (texture) => {
                 // texture is loaded
                 cloudGeo = new THREE.PlaneBufferGeometry(500, 500)
                 cloudMaterial = new THREE.MeshLambertMaterial({
